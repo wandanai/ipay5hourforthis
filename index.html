@@ -29,13 +29,13 @@
     </main>
   </div><div class="toast" id="toast"></div>
 <script>
-  const BLYNK='gV0VX-THiBBWZ6BZsoTuy0wNLGV1Xq8B';
+  const BLYNK='const BLYNK='https://blynk.cloud/external/api';';
   let pendingSpeed=null, timer=null, autoMode=false, powerOn=false;
   const $=id=>document.getElementById(id);
   function toast(message){$('toast').textContent=message;$('toast').classList.add('show');clearTimeout(timer);timer=setTimeout(()=>$('toast').classList.remove('show'),2600)}
   function token(){return $('token').value.trim()}
   function pin(id){return $(id).value.trim().toUpperCase()}
-  async function setPin(pinName,value){if(!token()){toast('กรุณาใส่ Blynk Token ก่อน');return false}try{const r=await fetch(`${BLYNK}/update?token=${encodeURIComponent(token())}&${encodeURIComponent(pinName)}=${encodeURIComponent(value)}`);if(!r.ok)throw new Error(r.status);$('onlineDot').classList.add('online');$('onlineText').textContent='เชื่อมต่อแล้ว';return true}catch(e){$('onlineDot').classList.remove('online');$('onlineText').textContent='เชื่อมต่อล้มเหลว';toast('ส่งคำสั่งไม่สำเร็จ ตรวจ Token และ Pin');return false}}
+  async function setPin(pinName,value){if(!token()){toast('gV0VX-THiBBWZ6BZsoTuy0wNLGV1Xq8B');return false}try{const r=await fetch(`${BLYNK}/update?token=${encodeURIComponent(token())}&${encodeURIComponent(pinName)}=${encodeURIComponent(value)}`);if(!r.ok)throw new Error(r.status);$('onlineDot').classList.add('online');$('onlineText').textContent='เชื่อมต่อแล้ว';return true}catch(e){$('onlineDot').classList.remove('online');$('onlineText').textContent='เชื่อมต่อล้มเหลว';toast('ส่งคำสั่งไม่สำเร็จ ตรวจ Token และ Pin');return false}}
   async function getPin(pinName){if(!token())return null;try{const r=await fetch(`${BLYNK}/get?token=${encodeURIComponent(token())}&${encodeURIComponent(pinName)}`);if(!r.ok)throw new Error(r.status);const data=await r.json();$('onlineDot').classList.add('online');$('onlineText').textContent='เชื่อมต่อแล้ว';return Array.isArray(data)?data[0]:data}catch(e){$('onlineDot').classList.remove('online');$('onlineText').textContent='เชื่อมต่อล้มเหลว';return null}}
   function renderSpeed(v){v=Math.max(0,Math.min(100,parseInt(v)||0));$('speed').value=v;$('speedOutput').value=v+'%';$('speedValue').textContent=v;$('fanStatus').textContent=v?'กำลังทำงาน':'ปิดอยู่';$('fanStatus').classList.toggle('off',!v)}
   $('speed').addEventListener('input',e=>{renderSpeed(e.target.value);pendingSpeed=Number(e.target.value)});
