@@ -4,48 +4,1758 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Airflow Control</title>
+
   <style>
-    :root{--ink:#17212b;--muted:#71808d;--line:#dfe7ea;--paper:#f7faf9;--card:#fff;--teal:#157a78;--teal-dark:#0f5e5c;--mint:#dff2ee;--red:#c5574e;--shadow:0 18px 50px #173b3d12}
-    *{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Arial,Helvetica,sans-serif}
-    button,input{font:inherit} button{cursor:pointer;border:0}.shell{min-height:100vh;display:flex}
-    aside{width:240px;background:#123d3d;color:#d9eeea;padding:28px 20px;display:flex;flex-direction:column}
-    .brand{display:flex;gap:12px;align-items:center;margin:0 8px 55px}.mark{width:42px;height:42px;border:1px solid #80cfc3;border-radius:12px;display:grid;place-items:center;color:#a6eee1;font-size:20px;font-weight:700}.brand strong{display:block;color:#fff;font-size:16px}.brand small{display:block;color:#91b5b1;font-size:11px;margin-top:2px}
-    nav{display:grid;gap:8px}.nav-item{padding:12px 14px;border-radius:9px;color:#a6c4c1}.nav-item.active{background:#23605e;color:#fff;font-weight:700}.side-note{margin-top:auto;border-top:1px solid #2b5b5a;padding:18px 8px 3px;color:#99bdb8;font-size:12px}.side-note b{display:block;color:#e0f3ef;margin-bottom:4px}
-    main{flex:1;max-width:1160px;padding:42px 48px}.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px}.eyebrow{color:var(--teal);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}.top h1{font:700 32px Georgia,serif;margin:5px 0 7px}.top p{margin:0;color:var(--muted)}.connection{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.dot{width:9px;height:9px;border-radius:50%;background:#a8b4b8}.dot.online{background:#2da886;box-shadow:0 0 0 4px #2da88622}.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:24px}.wide{grid-column:1/-1}.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.card h2{font-size:17px;margin:0}.label{font-size:12px;color:var(--muted);font-weight:700}.big-value{font-size:52px;font-weight:700;letter-spacing:-.06em;margin:10px 0 3px}.unit{font-size:16px;color:var(--muted);letter-spacing:0}.range-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:22px}.range-row output{font-weight:700;color:var(--teal);min-width:45px;text-align:right}.range{accent-color:var(--teal);width:100%;height:6px}.helper{color:var(--muted);font-size:12px;margin-top:10px}.status-pill{background:var(--mint);color:var(--teal-dark);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}.status-pill.off{background:#f3e4e2;color:var(--red)}.switch-row{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:15px 0}.switch-row:first-of-type{padding-top:0}.switch{width:46px;height:26px;background:#c6d1d2;border-radius:20px;padding:3px;transition:.2s}.switch i{display:block;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}.switch.on{background:var(--teal)}.switch.on i{transform:translateX(20px)}.actions{display:flex;gap:10px;margin-top:20px}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 15px;border-radius:8px;font-weight:700}.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}.btn.primary:hover{background:var(--teal-dark)}.btn:disabled{opacity:.5;cursor:not-allowed}.token{display:flex;gap:8px}.token input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 11px;outline:none}.token input:focus{border-color:var(--teal)}.pin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.pin-grid label{display:grid;gap:5px;color:var(--muted);font-size:11px}.pin-grid input{width:100%;padding:8px;border:1px solid var(--line);border-radius:7px}.toast{position:fixed;right:24px;bottom:24px;background:#123d3d;color:#fff;border-radius:9px;padding:12px 16px;opacity:0;transform:translateY(10px);transition:.2s}.toast.show{opacity:1;transform:none}
-    @media(max-width:800px){aside{display:none}main{padding:28px 18px}.top{display:block}.connection{margin-top:18px}.grid{grid-template-columns:1fr}.wide{grid-column:auto}.pin-grid{grid-template-columns:repeat(2,1fr)}}
+    :root{
+      --ink:#17212b;
+      --muted:#71808d;
+      --line:#dfe7ea;
+      --paper:#f7faf9;
+      --card:#fff;
+      --teal:#157a78;
+      --teal-dark:#0f5e5c;
+      --mint:#dff2ee;
+      --red:#c5574e;
+      --shadow:0 18px 50px #173b3d12;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      background:var(--paper);
+      color:var(--ink);
+      font:15px/1.5 Arial,Helvetica,sans-serif;
+    }
+
+    button,
+    input{
+      font:inherit;
+    }
+
+    button{
+      cursor:pointer;
+      border:0;
+    }
+
+    .shell{
+      min-height:100vh;
+      display:flex;
+    }
+
+    /* SIDEBAR */
+    aside{
+      width:240px;
+      background:#123d3d;
+      color:#d9eeea;
+      padding:28px 20px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin:0 8px 55px;
+    }
+
+    .mark{
+      width:42px;
+      height:42px;
+      border:1px solid #80cfc3;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      color:#a6eee1;
+      font-size:20px;
+      font-weight:700;
+    }
+
+    .brand strong{
+      display:block;
+      color:#fff;
+      font-size:16px;
+    }
+
+    .brand small{
+      display:block;
+      color:#91b5b1;
+      font-size:11px;
+      margin-top:2px;
+    }
+
+    nav{
+      display:grid;
+      gap:8px;
+    }
+
+    .nav-item{
+      padding:12px 14px;
+      border-radius:9px;
+      color:#a6c4c1;
+    }
+
+    .nav-item.active{
+      background:#23605e;
+      color:#fff;
+      font-weight:700;
+    }
+
+    .side-note{
+      margin-top:auto;
+      border-top:1px solid #2b5b5a;
+      padding:18px 8px 3px;
+      color:#99bdb8;
+      font-size:12px;
+    }
+
+    .side-note b{
+      display:block;
+      color:#e0f3ef;
+      margin-bottom:4px;
+    }
+
+    /* MAIN */
+    main{
+      flex:1;
+      max-width:1160px;
+      padding:42px 48px;
+    }
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      margin-bottom:32px;
+    }
+
+    .eyebrow{
+      color:var(--teal);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+    }
+
+    .top h1{
+      font:700 32px Georgia,serif;
+      margin:5px 0 7px;
+    }
+
+    .top p{
+      margin:0;
+      color:var(--muted);
+    }
+
+    .connection{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .dot{
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:#a8b4b8;
+    }
+
+    .dot.online{
+      background:#2da886;
+      box-shadow:0 0 0 4px #2da88622;
+    }
+
+    /* GRID */
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:20px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:14px;
+      box-shadow:var(--shadow);
+      padding:24px;
+    }
+
+    .wide{
+      grid-column:1/-1;
+    }
+
+    .card-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+
+    .card h2{
+      font-size:17px;
+      margin:0;
+    }
+
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .big-value{
+      font-size:52px;
+      font-weight:700;
+      letter-spacing:-.06em;
+      margin:10px 0 3px;
+    }
+
+    .unit{
+      font-size:16px;
+      color:var(--muted);
+      letter-spacing:0;
+    }
+
+    .range-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-top:22px;
+    }
+
+    .range-row output{
+      font-weight:700;
+      color:var(--teal);
+      min-width:45px;
+      text-align:right;
+    }
+
+    .range{
+      accent-color:var(--teal);
+      width:100%;
+      height:6px;
+    }
+
+    .helper{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:10px;
+    }
+
+    .status-pill{
+      background:var(--mint);
+      color:var(--teal-dark);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .status-pill.off{
+      background:#f3e4e2;
+      color:var(--red);
+    }
+
+    /* SWITCH */
+    .switch-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid var(--line);
+      padding:15px 0;
+    }
+
+    .switch-row:first-of-type{
+      padding-top:0;
+    }
+
+    .switch{
+      width:46px;
+      height:26px;
+      background:#c6d1d2;
+      border-radius:20px;
+      padding:3px;
+      transition:.2s;
+    }
+
+    .switch i{
+      display:block;
+      width:20px;
+      height:20px;
+      background:#fff;
+      border-radius:50%;
+      transition:.2s;
+    }
+
+    .switch.on{
+      background:var(--teal);
+    }
+
+    .switch.on i{
+      transform:translateX(20px);
+    }
+
+    /* BUTTON */
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:20px;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+      padding:10px 15px;
+      border-radius:8px;
+      font-weight:700;
+    }
+
+    .btn.primary{
+      background:var(--teal);
+      border-color:var(--teal);
+      color:#fff;
+    }
+
+    .btn.primary:hover{
+      background:var(--teal-dark);
+    }
+
+    .btn:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+
+    /* TOKEN */
+    .token{
+      display:flex;
+      gap:8px;
+    }
+
+    .token input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:8px;
+      padding:10px 11px;
+      outline:none;
+    }
+
+    .token input:focus{
+      border-color:var(--teal);
+    }
+
+    /* PINS */
+    .pin-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+    }
+
+    .pin-grid label{
+      display:grid;
+      gap:5px;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .pin-grid input{
+      width:100%;
+      padding:8px;
+      border:1px solid var(--line);
+      border-radius:7px;
+    }
+
+    /* LOG */
+    .log{
+      margin-top:15px;
+      background:#102f30;
+      color:#bce5df;
+      padding:12px;
+      border-radius:8px;
+      font:12px monospace;
+      min-height:45px;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    /* TOAST */
+    .toast{
+      position:fixed;
+      right:24px;
+      bottom:24px;
+      background:#123d3d;
+      color:#fff;
+      border-radius:9px;
+      padding:12px 16px;
+      opacity:0;
+      transform:translateY(10px);
+      transition:.2s;
+      z-index:999;
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:none;
+    }
+
+    /* MOBILE */
+    @media(max-width:800px){
+      aside{
+        display:none;
+      }
+
+      main{
+        padding:28px 18px;
+      }
+
+      .top{
+        display:block;
+      }
+
+      .connection{
+        margin-top:18px;
+      }
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .wide{
+        grid-column:auto;
+      }
+
+      .pin-grid{
+        grid-template-columns:repeat(2,1fr);
+      }
+    }
   </style>
 </head>
+
 <body>
-  <div class="shell">
-    <aside><div class="brand"><div class="mark">AF</div><div><strong>Airflow Control</strong><small>DEVICE CONSOLE</small></div></div><nav><div class="nav-item active">Overview</div><div class="nav-item">Fan control</div><div class="nav-item">Connection</div></nav><div class="side-note"><b>Smart ventilation</b>ควบคุมพัดลมผ่าน Blynk ได้จากหน้านี้</div></aside>
-    <main><header class="top"><div><div class="eyebrow">Home / Device</div><h1>ควบคุมพัดลม</h1><p>ปรับอากาศให้พอดี โดยไม่ต้องเดาค่า</p></div><div class="connection"><span class="dot" id="onlineDot"></span><span id="onlineText">ยังไม่ได้เชื่อมต่อ</span></div></header>
-      <section class="grid">
-        <article class="card"><div class="card-head"><h2>อุณหภูมิห้อง</h2><span class="status-pill" id="tempStatus">กำลังรอข้อมูล</span></div><div class="big-value"><span id="temperature">--</span><span class="unit"> °C</span></div><p class="helper">ข้อมูลจาก Blynk Datastream</p></article>
-        <article class="card"><div class="card-head"><h2>สถานะพัดลม</h2><span class="status-pill off" id="fanStatus">ปิดอยู่</span></div><div class="big-value"><span id="speedValue">0</span><span class="unit"> %</span></div><p class="helper">ความเร็วปัจจุบัน</p></article>
-        <article class="card"><div class="card-head"><h2>ความเร็วพัดลม</h2><span class="label">MANUAL</span></div><div class="range-row"><input class="range" id="speed" type="range" min="0" max="100" value="0"><output id="speedOutput">0%</output></div><p class="helper">ค่าจะไม่ถูกเขียนทับระหว่างรอการตอบกลับจากอุปกรณ์</p><div class="actions"><button class="btn primary" id="apply">นำไปใช้</button><button class="btn" id="stop">หยุดพัดลม</button></div></article>
-        <article class="card"><div class="card-head"><h2>โหมดการทำงาน</h2><span class="label" id="modeText">MANUAL</span></div><div class="switch-row"><span>เปิดพัดลม</span><button class="switch" id="power" aria-label="เปิดหรือปิดพัดลม"><i></i></button></div><div class="switch-row"><span>โหมดอัตโนมัติ</span><button class="switch" id="auto" aria-label="เปิดหรือปิดโหมดอัตโนมัติ"><i></i></button></div></article>
-        <article class="card wide"><div class="card-head"><h2>เชื่อมต่อ Blynk</h2><span class="label">LOCAL SETTINGS</span></div><div class="token"><input id="token" type="password" placeholder="วาง Device Auth Token ของคุณ"><button class="btn primary" id="save">บันทึก</button></div><div class="pin-grid" style="margin-top:16px"><label>อุณหภูมิ<input id="pinTemp" value="V0"></label><label>เปิด/ปิด<input id="pinPower" value="V1"></label><label>ความเร็ว<input id="pinSpeed" value="V2"></label><label>โหมด Auto<input id="pinAuto" value="V3"></label></div><p class="helper">ค่าเริ่มต้นใช้ V0–V3 หากตั้ง Datastream ต่างกันให้แก้ตรงนี้</p></article>
-      </section>
-    </main>
-  </div><div class="toast" id="toast"></div>
+
+<div class="shell">
+
+  <aside>
+
+    <div class="brand">
+      <div class="mark">AF</div>
+
+      <div>
+        <strong>Airflow Control</strong>
+        <small>DEVICE CONSOLE</small>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-item active">Overview</div>
+      <div class="nav-item">Fan control</div>
+      <div class="nav-item">Connection</div>
+    </nav>
+
+    <div class="side-note">
+      <b>Smart ventilation</b>
+      ควบคุมพัดลมผ่าน Blynk ได้จากหน้านี้
+    </div>
+
+  </aside>
+
+
+  <main>
+
+    <header class="top">
+
+      <div>
+        <div class="eyebrow">Home / Device</div>
+
+        <h1>ควบคุมพัดลม</h1>
+
+        <p>
+          ปรับความเร็วพัดลมผ่าน Blynk
+        </p>
+      </div>
+
+      <div class="connection">
+
+        <span
+          class="dot"
+          id="onlineDot">
+        </span>
+
+        <span id="onlineText">
+          ยังไม่ได้เชื่อมต่อ
+        </span>
+
+      </div>
+
+    </header>
+
+
+    <section class="grid">
+
+
+      <!-- TEMPERATURE -->
+
+      <article class="card">
+
+        <div class="card-head">
+
+          <h2>อุณหภูมิห้อง</h2>
+
+          <span
+            class="status-pill"
+            id="tempStatus">
+            กำลังรอข้อมูล
+          </span>
+
+        </div>
+
+        <div class="big-value">
+
+          <span id="temperature">
+            --
+          </span>
+
+          <span class="unit">
+            °C
+          </span>
+
+        </div>
+
+        <p class="helper">
+          ข้อมูลจาก Blynk Datastream V0
+        </p>
+
+      </article>
+
+
+      <!-- FAN STATUS -->
+
+      <article class="card">
+
+        <div class="card-head">
+
+          <h2>สถานะพัดลม</h2>
+
+          <span
+            class="status-pill off"
+            id="fanStatus">
+            ปิดอยู่
+          </span>
+
+        </div>
+
+        <div class="big-value">
+
+          <span id="speedValue">
+            0
+          </span>
+
+          <span class="unit">
+            %
+          </span>
+
+        </div>
+
+        <p class="helper">
+          ความเร็วปัจจุบัน
+        </p>
+
+      </article>
+
+
+      <!-- SPEED -->
+
+      <article class="card">
+
+        <div class="card-head">
+
+          <h2>ความเร็วพัดลม</h2>
+
+          <span class="label">
+            MANUAL
+          </span>
+
+        </div>
+
+
+        <div class="range-row">
+
+          <input
+            class="range"
+            id="speed"
+            type="range"
+            min="0"
+            max="100"
+            value="0">
+
+          <output id="speedOutput">
+            0%
+          </output>
+
+        </div>
+
+
+        <p class="helper">
+          เลือกความเร็วแล้วกด "นำไปใช้"
+        </p>
+
+
+        <div class="actions">
+
+          <button
+            class="btn primary"
+            id="apply">
+            นำไปใช้
+          </button>
+
+          <button
+            class="btn"
+            id="stop">
+            หยุดพัดลม
+          </button>
+
+        </div>
+
+      </article>
+
+
+      <!-- MODE -->
+
+      <article class="card">
+
+        <div class="card-head">
+
+          <h2>โหมดการทำงาน</h2>
+
+          <span
+            class="label"
+            id="modeText">
+            MANUAL
+          </span>
+
+        </div>
+
+
+        <div class="switch-row">
+
+          <span>
+            เปิดพัดลม
+          </span>
+
+          <button
+            class="switch"
+            id="power"
+            aria-label="เปิดหรือปิดพัดลม">
+
+            <i></i>
+
+          </button>
+
+        </div>
+
+
+        <div class="switch-row">
+
+          <span>
+            โหมดอัตโนมัติ
+          </span>
+
+          <button
+            class="switch"
+            id="auto"
+            aria-label="เปิดหรือปิดโหมดอัตโนมัติ">
+
+            <i></i>
+
+          </button>
+
+        </div>
+
+      </article>
+
+
+      <!-- BLYNK -->
+
+      <article class="card wide">
+
+        <div class="card-head">
+
+          <h2>
+            เชื่อมต่อ Blynk
+          </h2>
+
+          <span class="label">
+            BLYNK CLOUD
+          </span>
+
+        </div>
+
+
+        <div class="token">
+
+          <input
+            id="token"
+            type="password"
+            placeholder="Blynk Auth Token">
+
+          <button
+            class="btn primary"
+            id="save">
+            บันทึก
+          </button>
+
+        </div>
+
+
+        <div
+          class="pin-grid"
+          style="margin-top:16px">
+
+          <label>
+            อุณหภูมิ
+            <input
+              id="pinTemp"
+              value="V0">
+          </label>
+
+          <label>
+            เปิด/ปิด
+            <input
+              id="pinPower"
+              value="V1">
+          </label>
+
+          <label>
+            ความเร็ว
+            <input
+              id="pinSpeed"
+              value="V2">
+          </label>
+
+          <label>
+            โหมด Auto
+            <input
+              id="pinAuto"
+              value="V3">
+          </label>
+
+        </div>
+
+
+        <p class="helper">
+          ค่าเริ่มต้น: V0 = Temperature,
+          V1 = Power,
+          V2 = Speed,
+          V3 = Auto
+        </p>
+
+
+        <div
+          class="log"
+          id="log">
+          Ready...
+        </div>
+
+      </article>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<div
+  class="toast"
+  id="toast">
+</div>
+
+
 <script>
-  const BLYNK='const BLYNK='https://blynk.cloud/external/api';';
-  let pendingSpeed=null, timer=null, autoMode=false, powerOn=false;
-  const $=id=>document.getElementById(id);
-  function toast(message){$('toast').textContent=message;$('toast').classList.add('show');clearTimeout(timer);timer=setTimeout(()=>$('toast').classList.remove('show'),2600)}
-  function token(){return $('token').value.trim()}
-  function pin(id){return $(id).value.trim().toUpperCase()}
-  async function setPin(pinName,value){if(!token()){toast('gV0VX-THiBBWZ6BZsoTuy0wNLGV1Xq8B');return false}try{const r=await fetch(`${BLYNK}/update?token=${encodeURIComponent(token())}&${encodeURIComponent(pinName)}=${encodeURIComponent(value)}`);if(!r.ok)throw new Error(r.status);$('onlineDot').classList.add('online');$('onlineText').textContent='เชื่อมต่อแล้ว';return true}catch(e){$('onlineDot').classList.remove('online');$('onlineText').textContent='เชื่อมต่อล้มเหลว';toast('ส่งคำสั่งไม่สำเร็จ ตรวจ Token และ Pin');return false}}
-  async function getPin(pinName){if(!token())return null;try{const r=await fetch(`${BLYNK}/get?token=${encodeURIComponent(token())}&${encodeURIComponent(pinName)}`);if(!r.ok)throw new Error(r.status);const data=await r.json();$('onlineDot').classList.add('online');$('onlineText').textContent='เชื่อมต่อแล้ว';return Array.isArray(data)?data[0]:data}catch(e){$('onlineDot').classList.remove('online');$('onlineText').textContent='เชื่อมต่อล้มเหลว';return null}}
-  function renderSpeed(v){v=Math.max(0,Math.min(100,parseInt(v)||0));$('speed').value=v;$('speedOutput').value=v+'%';$('speedValue').textContent=v;$('fanStatus').textContent=v?'กำลังทำงาน':'ปิดอยู่';$('fanStatus').classList.toggle('off',!v)}
-  $('speed').addEventListener('input',e=>{renderSpeed(e.target.value);pendingSpeed=Number(e.target.value)});
-  $('apply').onclick=async()=>{const v=Number($('speed').value);pendingSpeed=v;await setPin(pin('pinAuto'),0);const ok=await setPin(pin('pinSpeed'),v);if(ok){await setPin(pin('pinPower'),v>0?1:0);powerOn=v>0;autoMode=false;$('modeText').textContent='MANUAL';$('auto').classList.remove('on');toast('บันทึกความเร็ว '+v+'% แล้ว)}setTimeout(()=>{pendingSpeed=null},4000)};
-  $('stop').onclick=async()=>{pendingSpeed=0;renderSpeed(0);await setPin(pin('pinPower'),0);await setPin(pin('pinSpeed'),0);powerOn=false;setTimeout(()=>pendingSpeed=null,4000);toast('หยุดพัดลมแล้ว')};
-  $('power').onclick=async()=>{powerOn=!powerOn;$('power').classList.toggle('on',powerOn);const v=powerOn?Number($('speed').value)||50:0;if(powerOn&&v===0)renderSpeed(50);await setPin(pin('pinAuto'),0);await setPin(pin('pinPower'),powerOn?1:0);await setPin(pin('pinSpeed'),powerOn?v:0);toast(powerOn?'เปิดพัดลมแล้ว':'ปิดพัดลมแล้ว')};
-  $('auto').onclick=async()=>{autoMode=!autoMode;$('auto').classList.toggle('on',autoMode);$('modeText').textContent=autoMode?'AUTO':'MANUAL';await setPin(pin('pinAuto'),autoMode?1:0);toast(autoMode?'เปิดโหมดอัตโนมัติ':'กลับสู่โหมด Manual')};
-  $('save').onclick=()=>{localStorage.setItem('blynk-token',$('token').value.trim());toast('บันทึกการตั้งค่าแล้ว');poll()};
-  async function poll(){const t=await getPin(pin('pinTemp'));if(t!==null){$('temperature').textContent=Number(t).toFixed(1);$('tempStatus').textContent='อัปเดตล่าสุด'}const s=await getPin(pin('pinSpeed'));if(s!==null&&pendingSpeed===null&&!autoMode){renderSpeed(s)}}
-  const stored=localStorage.getItem('blynk-token');if(stored)$('token').value=stored;poll();setInterval(poll,3000);
+
+/*
+==================================================
+ BLYNK CONFIG
+==================================================
+
+Template ID:
+TMPL64gdNur75
+
+Template Name:
+real
+
+Blynk API:
+https://blynk.cloud/external/api
+
+==================================================
+*/
+
+const BLYNK_API =
+  'https://blynk.cloud/external/api';
+
+
+/*
+==================================================
+ DEFAULT TOKEN
+
+ถ้าไม่ต้องการให้ Token อยู่ใน HTML
+ให้ลบบรรทัดนี้ออก แล้วกรอกในช่องหน้าเว็บแทน
+==================================================
+*/
+
+const DEFAULT_TOKEN =
+  'gV0VX-THiBBWZ6BZsoTuy0wNLGV1Xq8B';
+
+
+/*
+==================================================
+ VARIABLES
+==================================================
+*/
+
+let pendingSpeed = null;
+
+let pollTimer = null;
+
+let autoMode = false;
+
+let powerOn = false;
+
+
+/*
+==================================================
+ HELPER
+==================================================
+*/
+
+const $ = id =>
+  document.getElementById(id);
+
+
+/*
+==================================================
+ TOAST
+==================================================
+*/
+
+function toast(message){
+
+  $('toast').textContent = message;
+
+  $('toast').classList.add('show');
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer =
+    setTimeout(() => {
+
+      $('toast')
+        .classList
+        .remove('show');
+
+    }, 2600);
+
+}
+
+
+/*
+==================================================
+ LOG
+==================================================
+*/
+
+function log(message){
+
+  console.log('[BLYNK]', message);
+
+  $('log').textContent =
+    new Date().toLocaleTimeString() +
+    '  ' +
+    message;
+
+}
+
+
+/*
+==================================================
+ TOKEN
+==================================================
+*/
+
+function getToken(){
+
+  return $('token')
+    .value
+    .trim();
+
+}
+
+
+/*
+==================================================
+ PIN
+==================================================
+*/
+
+function getPin(id){
+
+  return $('' + id)
+    .value
+    .trim()
+    .toUpperCase();
+
+}
+
+
+/*
+==================================================
+ ONLINE
+==================================================
+*/
+
+function setOnline(){
+
+  $('onlineDot')
+    .classList
+    .add('online');
+
+  $('onlineText')
+    .textContent =
+    'เชื่อมต่อ Blynk แล้ว';
+
+}
+
+
+function setOffline(){
+
+  $('onlineDot')
+    .classList
+    .remove('online');
+
+  $('onlineText')
+    .textContent =
+    'เชื่อมต่อล้มเหลว';
+
+}
+
+
+/*
+==================================================
+ SET BLYNK DATSTREAM
+==================================================
+
+ตัวอย่าง:
+
+V1 = 1
+
+https://blynk.cloud/external/api/update
+?token=XXXX
+&V1=1
+
+==================================================
+*/
+
+async function setPin(pinName, value){
+
+  const token =
+    getToken();
+
+  if(!token){
+
+    toast(
+      'กรุณาใส่ Blynk Auth Token'
+    );
+
+    return false;
+
+  }
+
+
+  const url =
+    `${BLYNK_API}/update` +
+    `?token=${encodeURIComponent(token)}` +
+    `&${encodeURIComponent(pinName)}` +
+    `=${encodeURIComponent(value)}`;
+
+
+  log(
+    `ส่ง ${pinName} = ${value}`
+  );
+
+
+  try{
+
+    const response =
+      await fetch(url, {
+        method:'GET',
+        cache:'no-store'
+      });
+
+
+    if(!response.ok){
+
+      throw new Error(
+        'HTTP ' +
+        response.status
+      );
+
+    }
+
+
+    setOnline();
+
+    log(
+      `สำเร็จ ${pinName} = ${value}`
+    );
+
+    return true;
+
+
+  }catch(error){
+
+    console.error(
+      'Blynk SET error:',
+      error
+    );
+
+    setOffline();
+
+    log(
+      `ERROR: ${error.message}`
+    );
+
+    toast(
+      'ส่งคำสั่งไม่สำเร็จ'
+    );
+
+    return false;
+
+  }
+
+}
+
+
+/*
+==================================================
+ GET BLYNK DATSTREAM
+==================================================
+*/
+
+async function getPin(pinName){
+
+  const token =
+    getToken();
+
+  if(!token){
+
+    return null;
+
+  }
+
+
+  const url =
+    `${BLYNK_API}/get` +
+    `?token=${encodeURIComponent(token)}` +
+    `&${encodeURIComponent(pinName)}`;
+
+
+  try{
+
+    const response =
+      await fetch(url, {
+        method:'GET',
+        cache:'no-store'
+      });
+
+
+    if(!response.ok){
+
+      throw new Error(
+        'HTTP ' +
+        response.status
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    setOnline();
+
+
+    return Array.isArray(data)
+      ? data[0]
+      : data;
+
+
+  }catch(error){
+
+    console.error(
+      'Blynk GET error:',
+      error
+    );
+
+    setOffline();
+
+    return null;
+
+  }
+
+}
+
+
+/*
+==================================================
+ RENDER SPEED
+==================================================
+*/
+
+function renderSpeed(value){
+
+  let v =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        parseInt(value) || 0
+      )
+    );
+
+
+  $('speed').value =
+    v;
+
+  $('speedOutput').value =
+    v + '%';
+
+  $('speedValue').textContent =
+    v;
+
+
+  const status =
+    $('fanStatus');
+
+
+  if(v > 0){
+
+    status.textContent =
+      'กำลังทำงาน';
+
+    status.classList
+      .remove('off');
+
+  }else{
+
+    status.textContent =
+      'ปิดอยู่';
+
+    status.classList
+      .add('off');
+
+  }
+
+}
+
+
+/*
+==================================================
+ SLIDER
+==================================================
+*/
+
+$('speed')
+  .addEventListener(
+    'input',
+    event => {
+
+      renderSpeed(
+        event.target.value
+      );
+
+      pendingSpeed =
+        Number(
+          event.target.value
+        );
+
+    }
+  );
+
+
+/*
+==================================================
+ APPLY SPEED
+==================================================
+*/
+
+$('apply').onclick =
+  async function(){
+
+    const speed =
+      Number(
+        $('speed').value
+      );
+
+
+    pendingSpeed =
+      speed;
+
+
+    /*
+    เปลี่ยนเป็น Manual
+    */
+
+    const autoOK =
+      await setPin(
+        getPin('pinAuto'),
+        0
+      );
+
+
+    if(!autoOK){
+
+      pendingSpeed = null;
+
+      return;
+
+    }
+
+
+    /*
+    ส่งความเร็ว
+    */
+
+    const speedOK =
+      await setPin(
+        getPin('pinSpeed'),
+        speed
+      );
+
+
+    if(!speedOK){
+
+      pendingSpeed = null;
+
+      return;
+
+    }
+
+
+    /*
+    เปิด/ปิดตาม speed
+    */
+
+    const powerOK =
+      await setPin(
+        getPin('pinPower'),
+        speed > 0 ? 1 : 0
+      );
+
+
+    if(!powerOK){
+
+      pendingSpeed = null;
+
+      return;
+
+    }
+
+
+    powerOn =
+      speed > 0;
+
+    autoMode =
+      false;
+
+
+    $('power')
+      .classList
+      .toggle(
+        'on',
+        powerOn
+      );
+
+
+    $('auto')
+      .classList
+      .remove('on');
+
+
+    $('modeText')
+      .textContent =
+      'MANUAL';
+
+
+    toast(
+      'ส่งความเร็ว ' +
+      speed +
+      '% แล้ว'
+    );
+
+
+    setTimeout(
+      () => {
+        pendingSpeed = null;
+      },
+      4000
+    );
+
+  };
+
+
+/*
+==================================================
+ STOP
+==================================================
+*/
+
+$('stop').onclick =
+  async function(){
+
+    pendingSpeed =
+      0;
+
+
+    renderSpeed(0);
+
+
+    const powerOK =
+      await setPin(
+        getPin('pinPower'),
+        0
+      );
+
+
+    if(!powerOK){
+
+      pendingSpeed = null;
+
+      return;
+
+    }
+
+
+    const speedOK =
+      await setPin(
+        getPin('pinSpeed'),
+        0
+      );
+
+
+    if(!speedOK){
+
+      pendingSpeed = null;
+
+      return;
+
+    }
+
+
+    powerOn =
+      false;
+
+
+    $('power')
+      .classList
+      .remove('on');
+
+
+    toast(
+      'หยุดพัดลมแล้ว'
+    );
+
+
+    setTimeout(
+      () => {
+        pendingSpeed = null;
+      },
+      4000
+    );
+
+  };
+
+
+/*
+==================================================
+ POWER
+==================================================
+*/
+
+$('power').onclick =
+  async function(){
+
+    const newState =
+      !powerOn;
+
+
+    /*
+    ถ้ากำลังเปิด
+    */
+
+    let speed =
+      Number(
+        $('speed').value
+      );
+
+
+    if(
+      newState &&
+      speed === 0
+    ){
+
+      speed = 50;
+
+      renderSpeed(50);
+
+    }
+
+
+    /*
+    Manual mode
+    */
+
+    const autoOK =
+      await setPin(
+        getPin('pinAuto'),
+        0
+      );
+
+
+    if(!autoOK){
+
+      return;
+
+    }
+
+
+    /*
+    Power
+    */
+
+    const powerOK =
+      await setPin(
+        getPin('pinPower'),
+        newState ? 1 : 0
+      );
+
+
+    if(!powerOK){
+
+      return;
+
+    }
+
+
+    /*
+    Speed
+    */
+
+    const speedOK =
+      await setPin(
+        getPin('pinSpeed'),
+        newState ? speed : 0
+      );
+
+
+    if(!speedOK){
+
+      return;
+
+    }
+
+
+    powerOn =
+      newState;
+
+    autoMode =
+      false;
+
+
+    $('power')
+      .classList
+      .toggle(
+        'on',
+        powerOn
+      );
+
+
+    $('auto')
+      .classList
+      .remove('on');
+
+
+    $('modeText')
+      .textContent =
+      'MANUAL';
+
+
+    renderSpeed(
+      newState ? speed : 0
+    );
+
+
+    toast(
+      newState
+        ? 'เปิดพัดลมแล้ว'
+        : 'ปิดพัดลมแล้ว'
+    );
+
+  };
+
+
+/*
+==================================================
+ AUTO MODE
+==================================================
+*/
+
+$('auto').onclick =
+  async function(){
+
+    const newAuto =
+      !autoMode;
+
+
+    const result =
+      await setPin(
+        getPin('pinAuto'),
+        newAuto ? 1 : 0
+      );
+
+
+    if(!result){
+
+      return;
+
+    }
+
+
+    autoMode =
+      newAuto;
+
+
+    $('auto')
+      .classList
+      .toggle(
+        'on',
+        autoMode
+      );
+
+
+    $('modeText')
+      .textContent =
+      autoMode
+        ? 'AUTO'
+        : 'MANUAL';
+
+
+    toast(
+      autoMode
+        ? 'เปิดโหมดอัตโนมัติ'
+        : 'กลับสู่ Manual'
+    );
+
+  };
+
+
+/*
+==================================================
+ SAVE
+==================================================
+*/
+
+$('save').onclick =
+  function(){
+
+    const token =
+      getToken();
+
+
+    if(!token){
+
+      toast(
+        'กรุณาใส่ Token'
+      );
+
+      return;
+
+    }
+
+
+    localStorage.setItem(
+      'blynk-token',
+      token
+    );
+
+
+    toast(
+      'บันทึก Token แล้ว'
+    );
+
+
+    poll();
+
+  };
+
+
+/*
+==================================================
+ POLL BLYNK
+==================================================
+*/
+
+async function poll(){
+
+  if(!getToken()){
+
+    return;
+
+  }
+
+
+  /*
+  อุณหภูมิ
+  */
+
+  const temperature =
+    await getPin(
+      getPin('pinTemp')
+    );
+
+
+  if(
+    temperature !== null &&
+    temperature !== undefined
+  ){
+
+    const number =
+      Number(
+        temperature
+      );
+
+
+    if(!Number.isNaN(number)){
+
+      $('temperature')
+        .textContent =
+        number.toFixed(1);
+
+    }else{
+
+      $('temperature')
+        .textContent =
+        temperature;
+
+    }
+
+
+    $('tempStatus')
+      .textContent =
+      'อัปเดตล่าสุด';
+
+  }
+
+
+  /*
+  ความเร็ว
+  */
+
+  const speed =
+    await getPin(
+      getPin('pinSpeed')
+    );
+
+
+  if(
+    speed !== null &&
+    speed !== undefined &&
+    pendingSpeed === null &&
+    !autoMode
+  ){
+
+    renderSpeed(speed);
+
+    powerOn =
+      Number(speed) > 0;
+
+
+    $('power')
+      .classList
+      .toggle(
+        'on',
+        powerOn
+      );
+
+  }
+
+}
+
+
+/*
+==================================================
+ LOAD TOKEN
+==================================================
+*/
+
+/*
+ถ้ามี Token ที่บันทึกไว้ก่อน
+*/
+
+const storedToken =
+  localStorage.getItem(
+    'blynk-token'
+  );
+
+
+if(storedToken){
+
+  $('token').value =
+    storedToken;
+
+}else{
+
+  /*
+  ใช้ Default Token
+  */
+
+  $('token').value =
+    DEFAULT_TOKEN;
+
+}
+
+
+/*
+==================================================
+ INITIAL
+==================================================
+*/
+
+renderSpeed(0);
+
+
+/*
+โหลดข้อมูลทันที
+*/
+
+poll();
+
+
+/*
+อ่านข้อมูลทุก 3 วินาที
+*/
+
+setInterval(
+  poll,
+  3000
+);
+
 </script>
+
 </body>
 </html>
