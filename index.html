@@ -1,145 +1,1387 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1118">
+<title>Smart Fan Control</title>
 
-    .chart-container { max-width: 100%; }
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
-/* Final responsive control-room pass */
-:root { --ink:#10263b; --muted:#718193; --line:#d6e0e5; --canvas:#edf2f3; --surface:#fff; --teal:#087f87; --teal-soft:#e1f0f0; --amber:#d88a2e; }
-body { background:var(--canvas); color:var(--ink); }
-.card { border-radius:10px; box-shadow:0 12px 30px rgba(16,38,59,.06); }
-.card-title { font-size:11px; letter-spacing:.14em; }
-button, input { -webkit-tap-highlight-color:transparent; }
-button:focus-visible, input:focus-visible { outline:3px solid rgba(8,127,135,.28); outline-offset:3px; }
-.switch { min-width:48px; min-height:28px; }
-input[type="range"] { height:28px; margin-top:12px; }
-@media (min-width:901px) { .main { padding-top:44px; } .cards { grid-template-columns:repeat(3,minmax(0,1fr)); } .control-grid { grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr); } }
-@media (max-width:900px) { .main { padding:20px 14px 28px; } header h1 { font-size:26px; } .cards { grid-template-columns:repeat(2,minmax(0,1fr)); } .cards .card:last-child { grid-column:1/-1; } .control-grid { grid-template-columns:1fr; } .card { padding:18px; } .temperature span { font-size:40px; } .chart-container { height:220px; } }
-@media (max-width:520px) { .cards { grid-template-columns:1fr; } .cards .card:last-child { grid-column:auto; } header { margin-bottom:20px; } .online { width:100%; justify-content:center; } .control-row { gap:16px; } .control-info small { font-size:11px; } footer { padding:20px 8px; } }
+:root{
+    --bg:#080d13;
+    --panel:#0f1721;
+    --panel2:#131e2a;
+    --line:#223142;
+    --text:#f2f7fb;
+    --muted:#8292a5;
+    --cyan:#27d7e8;
+    --green:#37df91;
+    --orange:#ffad4d;
+    --red:#ff5c6c;
+    --shadow:0 20px 60px rgba(0,0,0,.35);
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:
+        radial-gradient(circle at 80% 0%,rgba(39,215,232,.08),transparent 30%),
+        radial-gradient(circle at 0% 100%,rgba(55,223,145,.05),transparent 30%),
+        var(--bg);
+    color:var(--text);
+    min-height:100vh;
+}
+
+button,
+input{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.app{
+    width:min(1400px,100%);
+    margin:auto;
+    padding:28px;
+}
+
+/* HEADER */
+
+header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.logo{
+    width:52px;
+    height:52px;
+    border:1px solid rgba(39,215,232,.35);
+    background:rgba(39,215,232,.08);
+    border-radius:15px;
+    display:grid;
+    place-items:center;
+    font-size:25px;
+}
+
+.brand h1{
+    font-size:22px;
+    letter-spacing:.04em;
+}
+
+.brand p{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:3px;
+}
+
+.connection{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    padding:10px 15px;
+    border-radius:30px;
+    color:var(--muted);
+    font-size:12px;
+}
+
+.dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--red);
+    box-shadow:0 0 12px rgba(255,92,108,.7);
+}
+
+.dot.online{
+    background:var(--green);
+    box-shadow:0 0 14px rgba(55,223,145,.7);
+}
+
+/* GRID */
+
+.top-grid{
+    display:grid;
+    grid-template-columns:1.5fr 1fr 1fr;
+    gap:16px;
+}
+
+.main-grid{
+    display:grid;
+    grid-template-columns:1.5fr 1fr;
+    gap:16px;
+    margin-top:16px;
+}
+
+.card{
+    background:linear-gradient(145deg,var(--panel),var(--panel2));
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:23px;
+    box-shadow:var(--shadow);
+}
+
+.label{
+    color:var(--muted);
+    text-transform:uppercase;
+    font-size:10px;
+    letter-spacing:.16em;
+    font-weight:700;
+}
+
+.big-temp{
+    margin-top:12px;
+    display:flex;
+    align-items:flex-end;
+    gap:7px;
+}
+
+.big-temp strong{
+    font-size:58px;
+    line-height:1;
+    font-weight:700;
+}
+
+.big-temp span{
+    color:var(--cyan);
+    font-size:21px;
+    margin-bottom:7px;
+}
+
+.sub{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:12px;
+}
+
+/* FAN */
+
+.fan-card{
+    text-align:center;
+}
+
+.fan-ring{
+    width:145px;
+    height:145px;
+    margin:18px auto 10px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    position:relative;
+    background:
+        conic-gradient(var(--cyan) 0deg,var(--cyan) var(--fan-angle),#243241 var(--fan-angle),#243241 360deg);
+}
+
+.fan-ring::before{
+    content:"";
+    position:absolute;
+    inset:9px;
+    background:var(--panel2);
+    border-radius:50%;
+}
+
+.fan-ring-content{
+    position:relative;
+    z-index:2;
+}
+
+.fan-ring strong{
+    display:block;
+    font-size:35px;
+}
+
+.fan-ring small{
+    color:var(--muted);
+}
+
+.status{
+    margin-top:8px;
+    font-size:13px;
+    color:var(--cyan);
+    font-weight:700;
+}
+
+/* CONTROL */
+
+.controls{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.control{
+    border:1px solid var(--line);
+    border-radius:15px;
+    padding:16px;
+    background:rgba(255,255,255,.015);
+}
+
+.control-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.control-title{
+    font-size:14px;
+    font-weight:650;
+}
+
+.control-info{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:4px;
+}
+
+.switch{
+    width:52px;
+    height:29px;
+    background:#263544;
+    border-radius:30px;
+    position:relative;
+    border:0;
+    transition:.2s;
+}
+
+.switch::after{
+    content:"";
+    position:absolute;
+    width:21px;
+    height:21px;
+    left:4px;
+    top:4px;
+    background:#fff;
+    border-radius:50%;
+    transition:.2s;
+}
+
+.switch.active{
+    background:var(--cyan);
+}
+
+.switch.active::after{
+    transform:translateX(23px);
+}
+
+/* SLIDER */
+
+.speed-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+}
+
+.speed-number{
+    color:var(--cyan);
+    font-size:22px;
+    font-weight:700;
+}
+
+input[type=range]{
+    width:100%;
+    appearance:none;
+    height:6px;
+    border-radius:10px;
+    background:#263544;
+    outline:none;
+}
+
+input[type=range]::-webkit-slider-thumb{
+    appearance:none;
+    width:21px;
+    height:21px;
+    border-radius:50%;
+    background:var(--cyan);
+    border:3px solid #0c141d;
+    box-shadow:0 0 0 1px var(--cyan);
+}
+
+input[type=range]::-moz-range-thumb{
+    width:21px;
+    height:21px;
+    border-radius:50%;
+    background:var(--cyan);
+    border:3px solid #0c141d;
+}
+
+/* QUICK */
+
+.quick{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+    margin-top:13px;
+}
+
+.quick button{
+    border:1px solid var(--line);
+    background:#172331;
+    color:var(--text);
+    padding:10px;
+    border-radius:10px;
+    transition:.15s;
+}
+
+.quick button:hover{
+    border-color:var(--cyan);
+    color:var(--cyan);
+}
+
+/* SYSTEM */
+
+.system{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-top:16px;
+}
+
+.info{
+    background:#0b131c;
+    border:1px solid var(--line);
+    padding:13px;
+    border-radius:12px;
+}
+
+.info span{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    margin-bottom:5px;
+}
+
+.info strong{
+    font-size:13px;
+}
+
+/* CHART */
+
+.chart{
+    margin-top:16px;
+}
+
+canvas{
+    width:100%!important;
+    height:250px!important;
+}
+
+/* NOTIFY */
+
+.toast{
+    position:fixed;
+    right:25px;
+    bottom:25px;
+    padding:13px 17px;
+    border-radius:12px;
+    background:#14212d;
+    border:1px solid var(--line);
+    color:#fff;
+    font-size:12px;
+    opacity:0;
+    transform:translateY(15px);
+    pointer-events:none;
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:950px){
+
+    .top-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .top-grid .card:first-child{
+        grid-column:1/-1;
+    }
+
+    .main-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:600px){
+
+    .app{
+        padding:15px;
+    }
+
+    header{
+        align-items:flex-start;
+    }
+
+    .connection{
+        padding:8px 11px;
+    }
+
+    .brand h1{
+        font-size:18px;
+    }
+
+    .top-grid{
+        grid-template-columns:1fr;
+    }
+
+    .top-grid .card:first-child{
+        grid-column:auto;
+    }
+
+    .big-temp strong{
+        font-size:48px;
+    }
+
+    .card{
+        padding:18px;
+        border-radius:17px;
+    }
+
+    .system{
+        grid-template-columns:1fr 1fr;
+    }
+}
 </style>
-
 </head>
-            min="0"
-            max="100"
-            value="0"
-            oninput="previewSpeed(this.value)"
-            onchange="setSpeed(this.value)"
-            oninput="previewSpeed(this.value)"
-            onchange="setSpeed(this.value)"
-            onpointerup="setSpeed(this.value)"
-            ontouchend="setSpeed(this.value)"
-        >
+
+<body>
+
+<div class="app">
+
+<header>
+
+    <div class="brand">
+        <div class="logo">❄</div>
+
+        <div>
+            <h1>SMART FAN</h1>
+            <p>ESP32 Climate Control System</p>
+        </div>
+    </div>
+
+    <div class="connection">
+        <div class="dot" id="connectionDot"></div>
+        <span id="connectionText">Connecting...</span>
+    </div>
+
+</header>
 
 
+<!-- TOP -->
 
-let fanStatus = "OFF";
+<section class="top-grid">
 
+    <div class="card">
+
+        <div class="label">Room Temperature</div>
+
+        <div class="big-temp">
+            <strong id="temperature">--.-</strong>
+            <span>°C</span>
+        </div>
+
+        <div class="sub">
+            Last update:
+            <span id="lastUpdate">--:--:--</span>
+        </div>
+
+    </div>
+
+
+    <div class="card fan-card">
+
+        <div class="label">Fan Output</div>
+
+        <div class="fan-ring"
+             id="fanRing"
+             style="--fan-angle:0deg">
+
+            <div class="fan-ring-content">
+
+                <strong id="fanSpeed">0%</strong>
+                <small>POWER</small>
+
+            </div>
+
+        </div>
+
+        <div class="status" id="fanStatus">
+            OFF
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="label">Operating Mode</div>
+
+        <div style="margin-top:25px;font-size:30px;font-weight:700"
+             id="modeText">
+
+            AUTO
+
+        </div>
+
+        <div class="sub">
+            Control source:
+            <span id="sourceText">WEB</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- MAIN -->
+
+<section class="main-grid">
+
+    <div>
+
+        <div class="card">
+
+            <div class="label">Fan Control</div>
+
+            <div class="controls">
+
+
+                <!-- POWER -->
+
+                <div class="control">
+
+                    <div class="control-head">
+
+                        <div>
+                            <div class="control-title">
+                                Power
+                            </div>
+
+                            <div class="control-info">
+                                Manual fan power
+                            </div>
+                        </div>
+
+                        <button
+                            class="switch"
+                            id="powerSwitch"
+                            onclick="togglePower()">
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- AUTO -->
+
+                <div class="control">
+
+                    <div class="control-head">
+
+                        <div>
+                            <div class="control-title">
+                                Automatic Mode
+                            </div>
+
+                            <div class="control-info">
+                                Temperature based control
+                            </div>
+                        </div>
+
+                        <button
+                            class="switch active"
+                            id="autoSwitch"
+                            onclick="toggleAuto()">
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SPEED -->
+
+                <div class="control">
+
+                    <div class="speed-row">
+
+                        <div>
+                            <div class="control-title">
+                                Fan Speed
+                            </div>
+
+                            <div class="control-info">
+                                Manual speed control
+                            </div>
+                        </div>
+
+                        <div class="speed-number">
+                            <span id="speedValue">0</span>%
+                        </div>
+
+                    </div>
+
+                    <input
+                        type="range"
+                        id="speedSlider"
+                        min="0"
+                        max="100"
+                        value="0"
+                        oninput="previewSpeed(this.value)"
+                        onchange="setSpeed(this.value)"
+                    >
+
+                    <div class="quick">
+
+                        <button onclick="setSpeed(25)">
+                            25%
+                        </button>
+
+                        <button onclick="setSpeed(50)">
+                            50%
+                        </button>
+
+                        <button onclick="setSpeed(75)">
+                            75%
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHART -->
+
+        <div class="card chart">
+
+            <div class="label">
+                Temperature History
+            </div>
+
+            <canvas id="temperatureChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- SYSTEM -->
+
+    <div>
+
+        <div class="card">
+
+            <div class="label">
+                System Information
+            </div>
+
+            <div class="system">
+
+                <div class="info">
+                    <span>DEVICE</span>
+                    <strong id="deviceType">--</strong>
+                </div>
+
+                <div class="info">
+                    <span>OS</span>
+                    <strong id="deviceOS">--</strong>
+                </div>
+
+                <div class="info">
+                    <span>BROWSER</span>
+                    <strong id="browser">--</strong>
+                </div>
+
+                <div class="info">
+                    <span>SCREEN</span>
+                    <strong id="screenSize">--</strong>
+                </div>
+
+                <div class="info">
+                    <span>VIEWPORT</span>
+                    <strong id="viewport">--</strong>
+                </div>
+
+                <div class="info">
+                    <span>TOUCH</span>
+                    <strong id="touch">--</strong>
+                </div>
+
+                <div class="info">
+                    <span>LANGUAGE</span>
+                    <strong id="language">--</strong>
+                </div>
+
+                <div class="info">
+                    <span>TIMEZONE</span>
+                    <strong id="timezone">--</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card" style="margin-top:16px">
+
+            <div class="label">
+                Connection
+            </div>
+
+            <div class="system">
+
+                <div class="info">
+                    <span>BLYNK</span>
+                    <strong id="blynkState">
+                        OFFLINE
+                    </strong>
+                </div>
+
+                <div class="info">
+                    <span>LAST ACTION</span>
+                    <strong id="lastAction">
+                        NONE
+                    </strong>
+                </div>
+
+                <div class="info">
+                    <span>TIME</span>
+                    <strong id="currentTime">
+                        --
+                    </strong>
+                </div>
+
+                <div class="info">
+                    <span>PAGE</span>
+                    <strong>WEB</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</div>
+
+
+<div class="toast" id="toast">
+    Updated
+</div>
+
+
+<script>
+
+/* =====================================================
+   BLYNK CONFIG
+===================================================== */
+
+const BLYNK_TOKEN = "gV0VX-THiBBWZ6BZsoTuy0wNLGV1Xq8B";
+
+const BLYNK_API =
+    "https://blynk.cloud/external/api";
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
+let temperature = 24.5;
+let fanSpeed = 0;
+let fanPower = false;
 let autoMode = true;
+
+let requestBusy = false;
+
+
+/* =====================================================
+   DEVICE INFO
+===================================================== */
+
+function getDeviceInfo(){
+
+    const ua = navigator.userAgent;
+
+    let device = "Desktop";
+    let os = "Unknown";
+    let browser = "Unknown";
+
+    if(/Android/i.test(ua))
+        device = "Mobile";
+
+    else if(/iPhone|iPad|iPod/i.test(ua))
+        device = "iPhone/iPad";
+
+    else if(/Windows/i.test(ua))
+        device = "Desktop";
+
+    else if(/Macintosh/i.test(ua))
+        device = "Mac";
+
+    if(/Android/i.test(ua))
+        os = "Android";
+
+    else if(/iPhone|iPad|iPod/i.test(ua))
+        os = "iOS";
+
+    else if(/Windows NT/i.test(ua))
+        os = "Windows";
+
+    else if(/Mac OS X/i.test(ua))
+        os = "macOS";
+
+    else if(/Linux/i.test(ua))
+        os = "Linux";
+
+
+    if(/Edg/i.test(ua))
+        browser = "Microsoft Edge";
+
+    else if(/Chrome/i.test(ua))
+        browser = "Google Chrome";
+
+    else if(/Firefox/i.test(ua))
+        browser = "Firefox";
+
+    else if(/Safari/i.test(ua))
+        browser = "Safari";
+
+
+    document.getElementById("deviceType").textContent =
+        device;
+
+    document.getElementById("deviceOS").textContent =
+        os;
+
+    document.getElementById("browser").textContent =
+        browser;
+
+    document.getElementById("screenSize").textContent =
+        `${screen.width} × ${screen.height}`;
+
+    document.getElementById("viewport").textContent =
+        `${window.innerWidth} × ${window.innerHeight}`;
+
+    document.getElementById("touch").textContent =
+        navigator.maxTouchPoints || 0;
+
+    document.getElementById("language").textContent =
+        navigator.language || "Unknown";
+
+    document.getElementById("timezone").textContent =
+        Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown";
+
+    return {
+        device,
+        os,
+        browser
+    };
+}
+
+
+/* =====================================================
+   TIME
+===================================================== */
+
+function getTime(){
+
+    return new Date().toLocaleTimeString(
+        "th-TH",
+        {
+            hour12:false
+        }
+    );
+}
+
+setInterval(()=>{
+
+    document.getElementById("currentTime")
+        .textContent = getTime();
+
+},1000);
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+function toast(message){
+
+    const el =
+        document.getElementById("toast");
+
+    el.textContent = message;
+
+    el.classList.add("show");
+
+    setTimeout(()=>{
+        el.classList.remove("show");
+    },1800);
+}
 
 
 /* =====================================================
    BLYNK GET
 ===================================================== */
-let autoMode = true;
-let pollInFlight = false;
-let controlWriteInFlight = false;
-let localStateHoldUntil = 0;
-let localStateVersion = 0;
 
-function holdLocalState(milliseconds = 4500) {
-    localStateHoldUntil = Date.now() + milliseconds;
-    localStateVersion += 1;
-}
+async function getPin(pin){
 
-function normalizeSpeed(value) {
-    const parsed = Number.parseInt(value, 10);
-    return Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : 0;
+    const response =
+        await fetch(
+            `${BLYNK_API}/get?token=${encodeURIComponent(BLYNK_TOKEN)}&${pin}`
+        );
+
+    if(!response.ok)
+        throw new Error("Blynk GET failed");
+
+    return await response.text();
 }
 
 
 /* =====================================================
-   BLYNK GET
+   BLYNK SET
 ===================================================== */
 
-async function getPin(pin) {
+async function setPin(pin,value){
 
+    try{
+
+        const response =
+            await fetch(
+                `${BLYNK_API}/update?token=${encodeURIComponent(BLYNK_TOKEN)}&${pin}=${encodeURIComponent(value)}`,
+                {
+                    method:"GET"
+                }
+            );
+
+        if(!response.ok)
+            throw new Error("Blynk update failed");
+
+        return true;
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        toast("Blynk update failed");
+
+        return false;
+    }
+}
+
+
+/* =====================================================
    READ BLYNK
 ===================================================== */
 
-async function readBlynk() {
+async function readBlynk(){
 
-    try {
-async function readBlynk() {
-    if (pollInFlight || controlWriteInFlight) return;
-    pollInFlight = true;
-    const pollVersion = localStateVersion;
+    if(requestBusy)
+        return;
 
-    try {
+    requestBusy = true;
 
-        const temp =
-            await getPin("V0");
-        }
+    try{
 
+        const results =
+            await Promise.all([
+                getPin("V0"),
+                getPin("V2"),
+                getPin("V3"),
+                getPin("V4")
+            ]);
 
-        if (speed !== null) {
+        temperature =
+            Number(results[0]);
 
-            fanSpeed =
-                parseInt(speed);
+        fanSpeed =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    parseInt(results[1])
+                )
+            );
 
-            updateSpeed();
-        }
+        autoMode =
+            parseInt(results[2]) === 1;
 
+        const status =
+            results[3].replace(/"/g,"").trim();
 
-        if (mode !== null) {
+        fanPower =
+            status !== "OFF";
 
-            autoMode =
-                parseInt(mode) === 1;
-
-            updateAuto();
-        }
-
-
-        if (status !== null) {
-        if (speed !== null && pollVersion === localStateVersion && Date.now() >= localStateHoldUntil) {
-            fanSpeed = normalizeSpeed(speed);
-            updateSpeed();
-        }
-
-
-        if (mode !== null && pollVersion === localStateVersion && Date.now() >= localStateHoldUntil) {
-            autoMode = parseInt(mode, 10) === 1;
-            updateAuto();
-        }
-
-
-        if (status !== null && pollVersion === localStateVersion && Date.now() >= localStateHoldUntil) {
-
-            fanStatus =
-                status.trim();
-        }
-
+        updateUI();
 
         setOnline(true);
 
-    }
+        addChartPoint(temperature);
 
-    catch (error) {
+    }
+    catch(error){
 
         console.error(error);
 
         setOnline(false);
+
+    }
+    finally{
+
+        requestBusy = false;
+
     }
 }
-        setOnline(true);
+
+
+/* =====================================================
+   ONLINE
+===================================================== */
+
+function setOnline(online){
+
+    const dot =
+        document.getElementById("connectionDot");
+
+    const text =
+        document.getElementById("connectionText");
+
+    const state =
+        document.getElementById("blynkState");
+
+    if(online){
+
+        dot.classList.add("online");
+
+        text.textContent =
+            "Blynk Connected";
+
+        state.textContent =
+            "ONLINE";
 
     }
+    else{
 
-    catch (error) {
-        console.error(error);
-        setOnline(false);
+        dot.classList.remove("online");
+
+        text.textContent =
+            "Disconnected";
+
+        state.textContent =
+            "OFFLINE";
     }
-    finally {
-        pollInFlight = false;
+}
+
+
+/* =====================================================
+   UI
+===================================================== */
+
+function updateUI(){
+
+    document.getElementById("temperature")
+        .textContent =
+        temperature.toFixed(1);
+
+    document.getElementById("fanSpeed")
+        .textContent =
+        fanSpeed + "%";
+
+    document.getElementById("speedValue")
+        .textContent =
+        fanSpeed;
+
+    document.getElementById("speedSlider")
+        .value =
+        fanSpeed;
+
+
+    const angle =
+        fanSpeed * 3.6;
+
+    document.getElementById("fanRing")
+        .style
+        .setProperty(
+            "--fan-angle",
+            angle + "deg"
+        );
+
+
+    let status =
+        document.getElementById("fanStatus");
+
+    if(autoMode){
+
+        status.textContent =
+            "AUTO";
+
+        document.getElementById("modeText")
+            .textContent =
+            "AUTO";
+
+    }
+    else if(fanPower){
+
+        status.textContent =
+            "ON";
+
+        document.getElementById("modeText")
+            .textContent =
+            "MANUAL";
+
+    }
+    else{
+
+        status.textContent =
+            "OFF";
+
+        document.getElementById("modeText")
+            .textContent =
+            "MANUAL";
     }
 
+
+    document.getElementById("powerSwitch")
+        .classList
+        .toggle(
+            "active",
+            fanPower
+        );
+
+    document.getElementById("autoSwitch")
+        .classList
+        .toggle(
+            "active",
+            autoMode
+        );
+
+    document.getElementById("lastUpdate")
+        .textContent =
+        getTime();
+}
+
+
+/* =====================================================
+   SEND LOG TO V5
+===================================================== */
+
+async function sendLog(action,details=""){
+
+    const info =
+        getDeviceInfo();
+
+    const ua =
+        navigator.userAgent
+        .replace(/[&|]/g," ");
+
+    const screenSize =
+        `${screen.width}x${screen.height}`;
+
+    const viewport =
+        `${window.innerWidth}x${window.innerHeight}`;
+
+    const touch =
+        navigator.maxTouchPoints || 0;
+
+    const lang =
+        navigator.language || "unknown";
+
+    const timezone =
+        Intl.DateTimeFormat()
+        .resolvedOptions()
+        .timeZone || "unknown";
+
+
+    const log =
+        `[${getTime()}] WEB
+ACTION: ${action}
+${details}
+DEVICE: ${info.device}
+OS: ${info.os}
+BROWSER: ${info.browser}
+SCREEN: ${screenSize}
+VIEWPORT: ${viewport}
+TOUCH: ${touch}
+LANG: ${lang}
+TIMEZONE: ${timezone}
+UA: ${ua}`;
+
+
+    /*
+       V5 ต้องเป็น Terminal
+       และ ESP32 ต้องรับ V5
+    */
+
+    await setPin(
+        "V5",
+        log
+    );
+}
+
+
+/* =====================================================
+   POWER
+===================================================== */
+
+async function togglePower(){
+
+    if(autoMode){
+
+        toast("ปิด AUTO ก่อน");
+
+        return;
+    }
+
+    const next =
+        !fanPower;
+
+    const ok =
+        await setPin(
+            "V1",
+            next ? 1 : 0
+        );
+
+    if(!ok)
+        return;
+
+
+    fanPower =
+        next;
+
+    if(next && fanSpeed === 0)
+        fanSpeed = 50;
+
+    updateUI();
+
+
+    document.getElementById("lastAction")
+        .textContent =
+        next ? "POWER ON" : "POWER OFF";
+
+
+    await sendLog(
+        next ? "POWER ON" : "POWER OFF",
+        `SPEED: ${fanSpeed}%
+MODE: MANUAL`
+    );
+
+    toast(
+        next
+            ? "Fan ON"
+            : "Fan OFF"
+    );
+}
+
+
+/* =====================================================
+   AUTO
+===================================================== */
+
+async function toggleAuto(){
+
+    const next =
+        !autoMode;
+
+
+    const ok =
+        await setPin(
+            "V3",
+            next ? 1 : 0
+        );
+
+    if(!ok)
+        return;
+
+
+    autoMode =
+        next;
+
+
+    updateUI();
+
+
+    document.getElementById("lastAction")
+        .textContent =
+        next
+            ? "AUTO ON"
+            : "AUTO OFF";
+
+
+    await sendLog(
+        next
+            ? "AUTO ON"
+            : "AUTO OFF",
+        `TEMP: ${temperature.toFixed(1)} C
+FAN: ${fanSpeed}%`
+    );
+
+
+    toast(
+        next
+            ? "AUTO enabled"
+            : "AUTO disabled"
+    );
+}
+
+
+/* =====================================================
+   PREVIEW SPEED
+===================================================== */
+
+function previewSpeed(value){
+
+    value =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                parseInt(value)
+            )
+        );
+
+    document.getElementById("speedValue")
+        .textContent =
+        value;
+
+    document.getElementById("fanSpeed")
+        .textContent =
+        value + "%";
+
+    document.getElementById("fanRing")
+        .style
+        .setProperty(
+            "--fan-angle",
+            value * 3.6 + "deg"
+        );
 }
 
 
@@ -147,143 +1389,201 @@ async function readBlynk() {
    SPEED
 ===================================================== */
 
-function updateSpeed() {
+async function setSpeed(value){
 
-    document.getElementById(
-        "speedValue"
-    ).textContent =
-        fanSpeed;
-function updateSpeed() {
-    fanSpeed = normalizeSpeed(fanSpeed);
-
-    document.getElementById(
-        "speedValue"
-    ).textContent =
-        fanSpeed;
+    value =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                parseInt(value)
+            )
+        );
 
 
-    document.getElementById(
-   AUTO
-===================================================== */
+    /*
+       Speed = Manual
+    */
 
-async function toggleAuto() {
+    const autoOK =
+        await setPin("V3",0);
 
-    const value =
-        autoMode
-            ? 0
-            : 1;
+    if(!autoOK)
+        return;
 
 
-    await setPin(
-        "V3",
-        value
-    );
+    const speedOK =
+        await setPin("V2",value);
+
+    if(!speedOK)
+        return;
+
+
+    const powerOK =
+        await setPin(
+            "V1",
+            value > 0 ? 1 : 0
+        );
+
+    if(!powerOK)
+        return;
 
 
     autoMode =
-        value === 1;
+        false;
+
+    fanSpeed =
+        value;
+
+    fanPower =
+        value > 0;
 
 
-    updateAuto();
+    updateUI();
 
 
-    if (autoMode) {
+    document.getElementById("lastAction")
+        .textContent =
+        `SPEED ${value}%`;
 
-        await readBlynk();
-    }
-}
-async function toggleAuto() {
-    if (controlWriteInFlight) return;
-    controlWriteInFlight = true;
-    const nextMode = !autoMode;
-    holdLocalState();
 
-    try {
-        const success = await setPin("V3", nextMode ? 1 : 0);
-        if (!success) return;
-        autoMode = nextMode;
-        updateAuto();
-        updateFanStatus();
-    } finally {
-        controlWriteInFlight = false;
-    }
+    await sendLog(
+        "SPEED CHANGE",
+        `SPEED: ${value}%
+MODE: MANUAL
+POWER: ${fanPower ? "ON" : "OFF"}`
+    );
+
+
+    toast(
+        `Speed ${value}%`
+    );
 }
 
 
 /* =====================================================
-}
+   CHART
+===================================================== */
+
+const canvas =
+    document.getElementById(
+        "temperatureChart"
+    );
+
+const ctx =
+    canvas.getContext("2d");
 
 
-async function setSpeed(value) {
+const chartData = {
+    labels:[],
+    datasets:[
+        {
+            label:"Temperature °C",
+            data:[],
+            borderWidth:2,
+            tension:.35,
+            pointRadius:2
+        }
+    ]
+};
 
-    value =
-        parseInt(value);
 
-
-    // Manual
-    await setPin(
-        "V3",
-        0
+const chart =
+    new Chart(
+        ctx,
+        {
+            type:"line",
+            data:chartData,
+            options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                plugins:{
+                    legend:{
+                        display:false
+                    }
+                },
+                scales:{
+                    y:{
+                        min:22,
+                        max:27,
+                        grid:{
+                            color:"#223142"
+                        },
+                        ticks:{
+                            color:"#8292a5"
+                        }
+                    },
+                    x:{
+                        grid:{
+                            display:false
+                        },
+                        ticks:{
+                            color:"#8292a5",
+                            maxTicksLimit:6
+                        }
+                    }
+                }
+            }
+        }
     );
 
 
-    // Speed
-    await setPin(
-        "V2",
-        value
-    );
+function addChartPoint(temp){
+
+    const time =
+        getTime().slice(0,5);
+
+    chartData.labels.push(time);
+
+    chartData.datasets[0]
+        .data
+        .push(temp);
 
 
-    // Power
-    await setPin(
-        "V1",
-        value > 0
-            ? 1
-            : 0
-    );
+    if(chartData.labels.length > 30){
 
+        chartData.labels.shift();
 
-    autoMode = false;
-
-    fanSpeed = value;
-
-    fanStatus =
-        value > 0
-            ? "ON"
-            : "OFF";
-
-
-    updateAuto();
-
-    updateSpeed();
-
-    updateFanStatus();
-
-    updatePowerButton();
-}
-async function setSpeed(value) {
-    if (controlWriteInFlight) return;
-    controlWriteInFlight = true;
-    value = normalizeSpeed(value);
-    holdLocalState();
-
-    try {
-        const manual = await setPin("V3", 0);
-        const speedWritten = manual && await setPin("V2", value);
-        const powerWritten = speedWritten && await setPin("V1", value > 0 ? 1 : 0);
-        if (!powerWritten) return;
-
-        autoMode = false;
-        fanSpeed = value;
-        fanStatus = value > 0 ? "ON" : "OFF";
-        updateAuto();
-        updateSpeed();
-        updateFanStatus();
-        updatePowerButton();
-    } finally {
-        controlWriteInFlight = false;
+        chartData.datasets[0]
+            .data
+            .shift();
     }
+
+    chart.update("none");
 }
 
 
 /* =====================================================
+   INIT
+===================================================== */
+
+getDeviceInfo();
+
+updateUI();
+
+readBlynk();
+
+
+/* อ่าน Blynk ทุก 2 วินาที */
+
+setInterval(
+    readBlynk,
+    2000
+);
+
+
+/* อัปเดต Device Info เมื่อ resize */
+
+window.addEventListener(
+    "resize",
+    getDeviceInfo
+);
+
+</script>
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>
